@@ -19,7 +19,7 @@
 ==========================================================================*)
 MODULE Coco;
 
-IMPORT Oberon, TextFrames, Texts, Viewers, CRS, CRP, CRT;
+IMPORT Oberon, Texts, CRS, CRP, CRT;
 
 CONST minErrDist = 8;
 
@@ -148,29 +148,12 @@ END Options;
 
 
 PROCEDURE Compile*;
-  VAR v: Viewers.Viewer; f: TextFrames.Frame; s: Texts.Scanner; src, t: Texts.Text;
+  VAR s: Texts.Scanner; src, t: Texts.Text;
     pos, beg, end, time: LONGINT; i: INTEGER;
 BEGIN
   Texts.OpenScanner(s, Oberon.Par.text, Oberon.Par.pos); Texts.Scan(s);
-  f := Oberon.Par.frame(TextFrames.Frame);
-  src := NIL; pos := 0;
-  IF (s.class = Texts.Char) & (s.c = "^") THEN
-    Oberon.GetSelection(t, beg, end, time);
-    IF time >= 0 THEN Texts.OpenScanner(s, t, beg); Texts.Scan(s) END
-  END;
-  IF s.class = Texts.Name THEN
     NEW(src); Texts.Open(src, s.s);
-  ELSIF (s.class = Texts.Char) & (s.c = "*") THEN
-    v := Oberon.MarkedViewer();
-    IF (v # NIL) & (v.dsc.next IS TextFrames.Frame) THEN
-      src := v.dsc.next(TextFrames.Frame).text;
-      Texts.OpenScanner(s, v.dsc(TextFrames.Frame).text, 0); Texts.Scan(s)
-    END
-  ELSIF (s.class = Texts.Char) & (s.c = "@") THEN
-    Oberon.GetSelection(t, beg, end, time);
-    IF time >= 0 THEN src := t; pos := beg; s.s := " " END
-  END;
-  IF src # NIL THEN
+    IF src # NIL THEN
     Texts.WriteString (w, "Coco/R - Compiler-Compiler V2.2"); Texts.Append(Oberon.Log, w.buf);
     i := 0; WHILE i < 10 DO CRT.ddt[i] := FALSE; INC(i) END;
     Options(s);
@@ -181,5 +164,6 @@ BEGIN
 END Compile;
 
 BEGIN
-  Texts.OpenWriter(w)
+  Texts.OpenWriter(w);
+  Compile
 END Coco.
