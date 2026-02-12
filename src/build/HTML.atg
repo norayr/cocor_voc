@@ -4,12 +4,12 @@ COMPILER HTML
    P.D. Terry and P.D. Koeslag, Rhodes University, 1995 *)
 
   IGNORE CASE
-  IGNORE CHR(1) .. CHR(13)
+  IGNORE tab + lf + cr + space
 
   CHARACTERS
     eol     = CHR(13) .
     Special = '<>&"=' .
-    Letter  = CHR(33) .. CHR(255) - Special.
+    Letter  = ANY - Special - tab - lf - cr - space - CHR(0) .
     Noquote = ANY - '"' - eol.
 
   TOKENS
@@ -71,7 +71,7 @@ COMPILER HTML
 
     PreFormatted   = "<PRE>" { InlineText } "</PRE>" .
 
-    Image          = "<IMG" Alignment "SRC" "=" FilePath [Alignment]
+    Image          = "<IMG" Alignment "SRC" "=" FilePath Alignment
                       [ "ALT" "=" String ] ">" .
 
     InlineText     = Word | String | Escape | Control | Format .

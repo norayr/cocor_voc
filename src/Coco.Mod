@@ -1,11 +1,11 @@
 (* Implementation restrictions
        3  too many nodes in graph (>1500)                         CRG.NewNode
-       4  too many sets (ANY-symbols or SYNC symbols)     CRT.NewAnySet, 
+       4  too many sets (ANY-symbols or SYNC symbols)     CRT.NewAnySet,
                                                                                CRT.ComputeSyncSet
        6  too many symbols (>300)                                   CRT.NewSym
        7  too many character classes (>50)                        CRT.NewClass
        9  too many conditions in generated code (>100)        CRX.NewCondSet
-       
+
    Trace output (ddt settings: ${digit})
     0  Prints states of automaton
     1  Prints start symbols and followers of nonterminals (also option /s)
@@ -27,11 +27,11 @@ VAR w: Texts.Writer; lastErrPos: LONGINT;
 
 
 PROCEDURE Error (n: INTEGER; pos: LONGINT);
-  
+
   PROCEDURE Msg (s: ARRAY OF CHAR);
   BEGIN Texts.WriteString(w, s)
   END Msg;
-  
+
 BEGIN
   INC(CRS.errors);
   IF pos < lastErrPos + minErrDist THEN lastErrPos := pos; RETURN END;
@@ -157,7 +157,7 @@ BEGIN
     Texts.WriteString (w, "Coco/R - Compiler-Compiler V2.2"); Texts.Append(Oberon.Log, w.buf);
     i := 0; WHILE i < 10 DO CRT.ddt[i] := FALSE; INC(i) END;
     Options(s);
-    Texts.WriteLn(w); Texts.WriteString(w, s.s); Texts.Append(Oberon.Log, w.buf);
+    Texts.WriteLn(w); Texts.WriteString(w, s.s); Texts.WriteLn(w); Texts.Append(Oberon.Log, w.buf);
     CRS.Reset(src, pos, Error); lastErrPos := -10;
     CRP.Parse
   END
