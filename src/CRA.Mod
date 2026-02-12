@@ -1,11 +1,11 @@
-MODULE CRA;  (* handles the DFA *) 
+MODULE CRA;  (* handles the DFA *)
 
 IMPORT Oberon, Texts, Sets, CRS, CRT;
 
 CONST
   maxStates = 300;
   EOL = 0DX;
-  
+
 TYPE
   State = POINTER TO StateNode;
   Action = POINTER TO ActionNode;
@@ -30,7 +30,7 @@ TYPE
     next:   Target;
   END;
 
-  
+
 
 
   Comment    = POINTER TO CommentNode;
@@ -105,7 +105,7 @@ BEGIN
   IF (top = 1) & (lo[0] = 0X) & (hi[1] = 7FX) & (CHR(ORD(hi[0]) + 2) = lo[1]) THEN
     Sets.Fill(s1); Sets.Differ(s1, s); PutS("~ "); PutRange(s1)
   ELSE
-    PutS("(");
+    (*PutS("(");*)
     i := 0;
     WHILE i <= top DO
       IF hi[i] = lo[i] THEN   PutS("(ch="); PutC(lo[i])
@@ -117,7 +117,7 @@ BEGIN
       IF i < top THEN PutS(" OR ") END;
       INC(i)
     END;
-    PutS(")");
+    (*PutS(")");*)
   END
 END PutRange;
 
@@ -188,7 +188,7 @@ VAR p,t: Target;
     t^.next:=p;
     IF lastp=NIL THEN list:=t ELSE lastp^.next:=t END
   END AddTarget;
-    
+
 BEGIN
   p := lista;
   WHILE p # NIL DO
@@ -230,26 +230,26 @@ END NewTransition;
 
 PROCEDURE NewComment*(from, to: INTEGER; nested: BOOLEAN);
   VAR com: Comment;
-  
+
   PROCEDURE MakeStr(gp: INTEGER; VAR s: ARRAY OF CHAR);
     VAR i, n: INTEGER; gn: CRT.GraphNode; set: CRT.Set;
   BEGIN
     i := 0;
     WHILE gp # 0 DO
       CRT.GetNode(gp, gn);
-      IF gn.typ = CRT.char THEN 
+      IF gn.typ = CRT.char THEN
         IF i < 2 THEN s[i] := CHR(gn.p1) END; INC(i)
       ELSIF gn.typ = CRT.class THEN
         CRT.GetClass(gn.p1, set);
         IF Sets.Elements(set, n) # 1 THEN SemErr(26) END;
         IF i < 2 THEN s[i] := CHR(n) END; INC(i)
-      ELSE SemErr(22) 
+      ELSE SemErr(22)
       END;
       gp := gn.next
     END;
     IF i > 2 THEN SemErr(25) ELSIF i < 2 THEN s[i] := 0X END
   END MakeStr;
-  
+
 BEGIN
   NEW(com);
   MakeStr(from, com^.start); MakeStr(to, com^.stop);
@@ -276,7 +276,7 @@ BEGIN
     a^.typ := CRT.class; a^.sym := nr
   END
 END ChangeAction;
-  
+
 
 PROCEDURE CombineShifts;
   VAR state: State; n: INTEGER; a, b, c: Action; seta, setb: CRT.Set;
@@ -307,7 +307,7 @@ VAR
   state, s1, s2: State;
   used: CRT.Set;
   newState: ARRAY maxStates OF State;
-  
+
   PROCEDURE FindUsedStates(state: State);
   VAR action: Action;
   BEGIN
@@ -319,7 +319,7 @@ VAR
       action:=action^.next
     END
   END FindUsedStates;
-  
+
   PROCEDURE DelUnused;
     VAR state: State;
   BEGIN
@@ -331,7 +331,7 @@ VAR
       state := state.next
     END
   END DelUnused;
-    
+
 BEGIN
   Sets.Clear(used); FindUsedStates(firstState);
   (*---------- combine equal final states ------------*)
@@ -384,7 +384,7 @@ PROCEDURE ConvertToStates*(gp0, sp: INTEGER);
     |  CRT.alt: NumberNodes(gn.p1, state); NumberNodes(gn.p2, state)
     END
   END NumberNodes;
-  
+
   PROCEDURE TheState(gp: INTEGER): State;
     VAR state: State; gn: CRT.GraphNode;
   BEGIN
@@ -392,7 +392,7 @@ PROCEDURE ConvertToStates*(gp0, sp: INTEGER);
     ELSE CRT.GetNode(gp, gn); RETURN S[gn.line]
     END
   END TheState;
-  
+
   PROCEDURE Step(from: State; gp: INTEGER);
     VAR gn: CRT.GraphNode;
   BEGIN
@@ -418,7 +418,7 @@ PROCEDURE ConvertToStates*(gp0, sp: INTEGER);
     |  CRT.alt: FindTrans(gn.p1, FALSE); FindTrans(gn.p2, FALSE)
     END
   END FindTrans;
-  
+
 BEGIN
   IF CRT.DelGraph(gp0) THEN SemErr(20) END;
   n := 0; NumberNodes(gp0, firstState);
@@ -450,12 +450,12 @@ END MatchDFA;
 
 PROCEDURE SplitActions(a, b: Action);
 VAR c: Action; seta, setb, setc: CRT.Set;
-  
+
   PROCEDURE CombineTransCodes(t1, t2: INTEGER; VAR result:INTEGER);
   BEGIN
     IF t1 = CRT.contextTrans THEN result := t1 ELSE result := t2 END
   END CombineTransCodes;
-    
+
 BEGIN
   MakeSet(a, seta); MakeSet(b, setb);
   IF Sets.Equal(seta, setb) THEN
@@ -489,7 +489,7 @@ END SplitActions;
 
 
 PROCEDURE MakeUnique(state: State; VAR changed:BOOLEAN);
-VAR a, b: Action; 
+VAR a, b: Action;
 
   PROCEDURE Overlap(a, b: Action): BOOLEAN;
     VAR seta, setb: CRT.Set;
@@ -505,7 +505,7 @@ VAR a, b: Action;
       END
     END
   END Overlap;
-  
+
 BEGIN
   a := state.firstAction; changed := FALSE;
   WHILE a # NIL DO
@@ -528,7 +528,7 @@ VAR
   set:     CRT.Set;
   s:      State;
   changed: BOOLEAN;
-  
+
   PROCEDURE AddMeltedSet(nr: INTEGER; VAR set: CRT.Set);
   VAR m: Melted;
   BEGIN
@@ -561,14 +561,14 @@ VAR
       t := t^.next
     END
   END GetStateSet;
-    
+
   PROCEDURE FillWithActions(state: State; targ: Target);
   VAR action,a: Action;
   BEGIN
     WHILE targ # NIL DO
       action := targ^.state.firstAction;
       WHILE action # NIL DO
-        NEW(a); a^ := action^; a^.target := NIL; 
+        NEW(a); a^ := action^; a^.target := NIL;
         AddTargetList(action^.target, a^.target);
         AddAction(a, state.firstAction);
         action:=action^.next
@@ -629,7 +629,7 @@ BEGIN
   state := firstState;
   WHILE state # NIL DO
     REPEAT MakeUnique(state, changed) UNTIL ~ changed;
-    state := state.next 
+    state := state.next
   END;
   correct := TRUE;
   state := firstState;
@@ -660,7 +660,7 @@ BEGIN
   state := firstState;
   WHILE state # NIL DO
     action := state.firstAction; first:=TRUE;
-    IF state.endOf = CRT.noSym THEN PutS("     ") 
+    IF state.endOf = CRT.noSym THEN PutS("     ")
     ELSE PutS("E("); PutI2(state.endOf, 2); Put(")")
     END;
     PutI2(state.nr, 3); Put(":"); IF action = NIL THEN PutS(" $") END;
@@ -720,7 +720,7 @@ PROCEDURE GenComment(com:Comment; i: INTEGER);
     PutS("      ELSE NextCh END;$");
     PutS("    END;$");
     END GenBody;
-    
+
 BEGIN
   PutS("PROCEDURE Comment"); PutI(i); PutS("(): BOOLEAN;$");
   PutS("  VAR level, startLine: INTEGER; oldLineStart: LONGINT;$");
@@ -762,9 +762,9 @@ BEGIN
 END CopyFramePart;
 
 PROCEDURE GenLiterals;
-  VAR 
-    i, j, k, l: INTEGER; 
-    key: ARRAY 128 OF CRT.Name; 
+  VAR
+    i, j, k, l: INTEGER;
+    key: ARRAY 128 OF CRT.Name;
     knr: ARRAY 128 OF INTEGER;
     ch: CHAR;
     sn: CRT.SymbolNode;
@@ -805,7 +805,7 @@ PROCEDURE WriteState(state: State);
 BEGIN
   endOf := state.endOf;
   IF (endOf > CRT.maxT) & (endOf # CRT.noSym) THEN (*pragmas have been moved*)
-    endOf := CRT.maxT + CRT.maxSymbols - endOf 
+    endOf := CRT.maxT + CRT.maxSymbols - endOf
   END;
   PutS("    | "); PutI2(state.nr, 2); PutS(": ");
   first:=TRUE; ctxEnd := state.ctx;
@@ -819,8 +819,8 @@ BEGIN
     IF action.target.state.nr # state.nr THEN
       PutS(" state := "); PutI(action.target.state.nr); Put(";")
     END;
-    IF action^.tc = CRT.contextTrans THEN PutS(" INC(apx)"); ctxEnd := FALSE 
-    ELSIF state.ctx THEN PutS(" apx := 0") 
+    IF action^.tc = CRT.contextTrans THEN PutS(" INC(apx)"); ctxEnd := FALSE
+    ELSIF state.ctx THEN PutS(" apx := 0")
     END;
     PutS(" $");
     action := action^.next
@@ -841,7 +841,7 @@ END WriteState;
 
 PROCEDURE *Show (t: Texts.Text; op: INTEGER; beg, end: LONGINT);
 END Show;
-  
+
 
 PROCEDURE WriteScanner* (VAR ok: BOOLEAN);
 VAR
@@ -854,7 +854,7 @@ VAR
   sn:       CRT.SymbolNode;
   state: State;
   t: Texts.Text;
-  
+
   PROCEDURE FillStartTab;
     VAR action: Action; i, targetState: INTEGER; class: CRT.Set;
   BEGIN
@@ -863,7 +863,7 @@ VAR
     action := firstState.firstAction;
     WHILE action # NIL DO
       targetState := action.target.state.nr;
-      IF action^.typ = CRT.char THEN 
+      IF action^.typ = CRT.char THEN
         startTab[action^.sym] := targetState
       ELSE
         CRT.GetClass(action^.sym, class); i := 0;
@@ -875,7 +875,7 @@ VAR
       action := action^.next
     END
   END FillStartTab;
-    
+
 BEGIN
   IF dirtyDFA THEN MakeDeterministic(ok) END;
   FillStartTab;
@@ -887,7 +887,7 @@ BEGIN
     Texts.Append(Oberon.Log, out.buf); HALT(99)
   END;
   Texts.Append(Oberon.Log, out.buf);
-  
+
   (*------- *S.MOD -------*)
   CopyFramePart("-->modulename"); PutS(scanner);
   CopyFramePart("-->declarations"); PutS("  noSym = "); PutI(CRT.maxT); Put(";");
@@ -895,7 +895,7 @@ BEGIN
   com := firstComment; i := 0;
   WHILE com # NIL DO GenComment(com, i); com := com^.next; INC(i) END;
   CopyFramePart("-->literals"); GenLiterals;
-  
+
   CopyFramePart("-->GetSy1");
   PutS("  WHILE (ch=20X)"); IF ~ Sets.Empty(CRT.ignored) THEN PutS(" OR ") END;
   PutRange(CRT.ignored); PutS(" DO NextCh END;");
@@ -913,7 +913,7 @@ BEGIN
   state := firstState.next;
   WHILE state # NIL DO WriteState(state); state := state.next END;
   PutS("    | "); PutI2(stateNr + 1, 2); PutS(": sym := 0; ch := 0X; RETURN$");
-  
+
   CopyFramePart("-->initialization");
   i := 0;
   WHILE i < 32 DO
@@ -922,10 +922,10 @@ BEGIN
       PutS("start["); PutI(4*i+j); PutS("]:="); PutI(startTab[4*i+j]); PutS("; ");
       INC(j)
     END;
-    Texts.WriteLn(out); 
+    Texts.WriteLn(out);
     INC(i)
   END;
-  
+
   CopyFramePart("-->modulename"); PutS(scanner); Put(".");
   NEW(t); t.notify := Show; Texts.Open(t, ""); Texts.Append(t, out.buf);
   l := Length(scanner); scanner[l] := "."; scanner[l+1] := "M"; scanner[l+2] := "o"; scanner[l+3] := "d"; scanner[l+4] := 0X;
