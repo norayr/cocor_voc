@@ -921,10 +921,8 @@ BEGIN
   NEW(t); (* t.notify := Show; *)
   Texts.Open(t, ""); Texts.Append(t, out.buf);
   l := Length(scanner); scanner[l] := "."; scanner[l+1] := "M"; scanner[l+2] := "o"; scanner[l+3] := "d"; scanner[l+4] := 0X;
-(*  Texts.Close(t, scanner)  *)
-  Backup(scanner);
-  NEW(t); (*t.notify := Show;*) Texts.Open(t, "");
-  Texts.Close(t, scanner)
+  Texts.Close(t, scanner);
+  (*Backup(scanner);*)
 END WriteScanner;
 
 
