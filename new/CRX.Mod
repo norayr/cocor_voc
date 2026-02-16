@@ -505,10 +505,7 @@ PROCEDURE GenCompiler*;
     VAR fileName: ARRAY 32 OF CHAR;
   BEGIN
     Append1(fileName, name, ".Mod"); (* fileName := name + ".Mod" *)
-    (*  Texts.Close(t, fileName)  *)
-    CRA.Backup(fileName);
-    NEW(t); Texts.Open(t, "");
-  Texts.Close(t, fileName)
+    Texts.Close(t, fileName);
   END Store;
 
   PROCEDURE GenParser;
